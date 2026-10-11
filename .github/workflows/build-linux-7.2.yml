@@ -1,4 +1,4 @@
-name: Build NanoPC-T6 Ubuntu 26.04 UEFI SD Image (EDK2 + GRUB)
+name: Build NanoPC-T6 Ubuntu 26.10 UEFI SD Image (EDK2 + GRUB)
 
 on:
   workflow_dispatch:
