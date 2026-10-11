@@ -168,6 +168,26 @@ CONFIG_DMA_SHARED_BUFFER=y
 CONFIG_MEDIA_CONTROLLER=y
 CONFIG_VIDEO_V4L2_SUBDEV_API=y
 
+####################
+# Выключаем динамическое переключение, разгружаем ARM64 от static_call
+CONFIG_PREEMPT_DYNAMIC=n
+
+# Жестко фиксируем Low-Latency Desktop (полное вытеснение)
+CONFIG_PREEMPT=y
+# CONFIG_PREEMPT_NONE is not set
+# CONFIG_PREEMPT_VOLUNTARY is not set
+
+# Обязательные параметры для mainline DRM Rockchip на ядре 7.x
+CONFIG_DRM=y
+CONFIG_DRM_ROCKCHIP=y
+CONFIG_ROCKCHIP_VOP2=y
+CONFIG_DRM_DW_HDMI_QP_ROCKCHIP=y
+
+# Выделение памяти под 4K/8K фреймбуферы (CMA)
+CONFIG_CMA=y
+CONFIG_DMA_CMA=y
+CONFIG_CMA_SIZE_MBYTES=1024
+
 # ====================================================================
 # 🎛️ Сжатие оперативной памяти ZRAM
 # ====================================================================
