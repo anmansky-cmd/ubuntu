@@ -3,7 +3,7 @@ name: ubuntu-rootfs
 display-name: Ubuntu rootfs ARM64
 revision: 2
 architecture: arm64
-series: resolute # РЕКОМЕНДАЦИЯ: Если 'resolute' еще не полностью доступен на ://ubuntu.com, используйте 'noble' (24.04)
+series: stonking # РЕКОМЕНДАЦИЯ: Если 'resolute' еще не полностью доступен на ://ubuntu.com, используйте 'noble' (24.04)
 class: preinstalled
 
 rootfs:
@@ -20,7 +20,7 @@ rootfs:
     urls:
        - "https://git.launchpad.net/~ubuntu-core-dev/ubuntu-seeds/+git/"
        #      - "https://git.launchpad.net/~ubuntu-core-dev/ubuntu-seeds/+git/ubuntu.resolute"
-    branch: resolute # Должно соответствовать выбранной серии (noble или resolute)
+    branch: stonking # Должно соответствовать выбранной серии (noble или resolute)
     names:
       - minimal
 
