@@ -39,7 +39,7 @@ jobs:
       # ЭТАП 1: СБОРКА ЯДРА LINUX 7.2 С ПАТЧАМИ RKVDEC
       # EDK2 не требует U-Boot, но ядро всё равно нужно с патчами
       # ============================================================
-      - name: Build Linux 7.2 Kernel (ARM64 + rkvdec patches)
+      - name: Build Linux 7.3 Kernel (ARM64 + rkvdec patches)
         run: |
           chmod +x build-kernel.sh
           ./build-kernel.sh "kernel-build"
