@@ -55,7 +55,36 @@ wget https://raw.githubusercontent.com/warpme/minimyth2/refs/heads/master/script
 # ДОБАВИТЬ: патч питания SD-слота для NanoPC-T6
 ## wget -O nanopc-t6-sdmmc-regulator.patch \
 #  "https://lore.kernel.org/r/20240102024054.1030313-1-inindev@gmail.com/raw"
+# Скачивание патчей медиа-декодера rkvdec
+mkdir patches && cd patches
+# ... ваши существующие wget ...
 
+# ДОБАВИТЬ: патч отключения HDMI RX (создаём прямо здесь, в patches/)
+cat > nanopc-t6-disable-hdmirx.patch << 'PATCH_EOF'
+--- a/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dts
++++ b/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dts
+@@ -1,3 +1,13 @@
++&hdmi_receiver {
++	status = "disabled";
++};
++
++&hdmi_receiver_cma {
++	status = "disabled";
++};
++
+ /dts-v1/;
+ #include "rk3588.dtsi"
+ #include "rk3588-nanopc-t6.dtsi"
+PATCH_EOF
+
+cd "$BASE_DIR/source"
+
+# Применение патчей
+echo "=== Применение патчей ==="
+for patch_file in "$BASE_DIR"/patches/*.patch; do
+    echo "Применяется: $patch_file"
+    patch -p1 --forward < "$patch_file" || true
+done
 
 cd "$BASE_DIR/source"
 
@@ -65,21 +94,6 @@ cd "$BASE_DIR/source"
 #        echo "Применяется: $patch_file"
 #        patch -p1 < "$patch_file"
 #done
-# Патч для отключения HDMI-приемника (создайте вручную в patches/)
-cat > patches/nanopc-t6-disable-hdmirx.patch << 'EOF'
---- a/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dts
-+++ b/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dts
-@@ -XXX,XX +XXX,XX @@
- };
-+
-+&hdmi_receiver {
-+	status = "disabled";
-+};
-+
-+&hdmi_receiver_cma {
-+	status = "disabled";
-+};
-EOF
 
 # Создаем файл настроек (Kconfig-фрагмент) для NanoPC-T6, RTL8822CE и зависимостей RTL8812AU
 cat << 'EOF' > my-add.txt
