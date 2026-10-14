@@ -56,6 +56,7 @@ wget https://raw.githubusercontent.com/warpme/minimyth2/refs/heads/master/script
 ## wget -O nanopc-t6-sdmmc-regulator.patch \
 #  "https://lore.kernel.org/r/20240102024054.1030313-1-inindev@gmail.com/raw"
 
+
 cd "$BASE_DIR/source"
 
 # Применение патчей стабильности rkvdec медиадекодера
@@ -64,6 +65,21 @@ cd "$BASE_DIR/source"
 #        echo "Применяется: $patch_file"
 #        patch -p1 < "$patch_file"
 #done
+# Патч для отключения HDMI-приемника (создайте вручную в patches/)
+cat > patches/nanopc-t6-disable-hdmirx.patch << 'EOF'
+--- a/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dts
++++ b/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dts
+@@ -XXX,XX +XXX,XX @@
+ };
++
++&hdmi_receiver {
++	status = "disabled";
++};
++
++&hdmi_receiver_cma {
++	status = "disabled";
++};
+EOF
 
 # Создаем файл настроек (Kconfig-фрагмент) для NanoPC-T6, RTL8822CE и зависимостей RTL8812AU
 cat << 'EOF' > my-add.txt
