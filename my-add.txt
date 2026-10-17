@@ -303,3 +303,133 @@ CONFIG_NLS_CODEPAGE_1251=m
 CONFIG_NLS_ISO8859_5=m
 CONFIG_NLS_KOI8_R=m
 CONFIG_NLS_KOI8_U=m
+
+#######################################
+#
+#    (Open Firmware / Device Tree) базовый парсер дерева устройств
+#   Без него ядро вообще не сможет читать .dtb файлы.
+#
+CONFIG_OF=y
+
+#
+#   cтандартные пакеты и драйверы Ubuntu 26.10 скомпилированы
+#   и оптимизированы именно под размер страницы 4KB
+#
+CONFIG_ARM64_4K_PAGES=y
+
+# Базовый фреймворк сторожевых таймеров Linux
+CONFIG_WATCHDOG=y
+CONFIG_WATCHDOG_CORE=y
+CONFIG_ACPI_WATCHDOG=y
+
+# Общий парсер дерева устройств для ватчдогов (обязателен для ARM64 Mainline)
+CONFIG_WATCHDOG_HANDLE_BOOT_ENABLED=y
+
+# Главный драйвер для RK3588 (DesignWare APB Watchdog)
+CONFIG_DW_WATCHDOG=y
+
+# Защита от зависания при панике ядра (рекомендуется для mainline)
+# При панике ядра ватчдог не отключится и принудительно перезагрузит плату
+CONFIG_WATCHDOG_NOWAYOUT=y
+
+# Экспорт управления таймаутами в sysfs (/sys/class/watchdog/)
+CONFIG_WATCHDOG_SYSFS=y
+
+#  Подсистема питания (Инициализирующий стек)
+#
+CONFIG_REGULATOR_RK808=y
+CONFIG_MFD_RK808=y
+CONFIG_SPI_ROCKCHIP=y       # PMIC RK806 на NanoPC-T6 подключен по SPI
+#
+# Thermal & DVFS
+#
+CONFIG_ROCKCHIP_THERMAL=y
+CONFIG_ARM_ROCKCHIP_CPUFREQ=y
+CONFIG_PM_DEVFREQ=y
+#
+#eMMC, SD-карты и NVMe SSD
+#
+CONFIG_MMC_SDHCI_OF_ROCKCHIP=y # Драйвер для встроенной eMMC
+CONFIG_MMC_DW=y                # Для слота MicroSD
+CONFIG_MMC_SDHCI_OF_DWCMSHC=y
+CONFIG_MMC_SDHCI_OF_ARASAN=y
+CONFIG_PCIE_ROCKCHIP_DW_HOST=y # Полноценный контроллер PCIe 3.0 для вашего M.2 NVMe SSD
+
+# Регуляторы RK808 — встроить
+# повтор CONFIG_REGULATOR_RK808=y
+CONFIG_PINCTRL_RK805=y
+CONFIG_COMMON_CLK_RK808=y
+CONFIG_RTC_DRV_RK808=y
+CONFIG_INPUT_RK805_PWRKEY=y
+
+#
+# Сеть и Ethernet (Критический фикс mainline 7.3)
+#
+CONFIG_STMMAC_ETH=y
+CONFIG_STMMAC_PLATFORM=y
+CONFIG_DWMAC_ROCKCHIP=y       # Специфичный "клей" для сетевого чипа Rockchip
+CONFIG_MOTORCOMM_PHY=m        # Драйвер физического уровня для чипов YT8531 (актуально для NanoPC)
+CONFIG_R8169=y
+CONFIG_REALTEK_PHY=y
+
+#
+#  Графика и Дисплей (Встроенный GPU Mali и HDMI)
+#
+CONFIG_DRM_PANTHOR=y          # Новый mainline-драйвер для GPU Mali-G610
+CONFIG_DRM_ROCKCHIP=y         # Модуль дисплейного процессора (VOP2)
+CONFIG_ROCKCHIP_ANALOGIX_DP=y # Поддержка вывода видео
+CONFIG_ROCKCHIP_INNO_HDMI=y
+
+#
+#  Аппаратный NPU (Нейропроцессор)
+#
+
+CONFIG_DRM_ACCEL_ROCKET=y     # Создает устройство ускорения в /dev/accel/
+
+#
+#  uefi edk2
+#
+# --- EFI Базовый слой ---
+
+CONFIG_EFI=y
+CONFIG_EFI_STUB=y
+CONFIG_EFI_ESRT=y
+CONFIG_EFI_RUNTIME_WRAPPERS=y
+
+# --- EFI Консоль и Экран (Критично для вывода графики) ---
+CONFIG_EFI_EARLYCON=y
+CONFIG_FB_EFI=y
+CONFIG_DRM_EFI_FRAMEBUFFER=y
+
+# --- Поддержка GPT разметки (EDK2 требует GPT на NVMe/eMMC) ---
+CONFIG_PARTITION_ADVANCED=y
+CONFIG_EFI_PARTITION=y
+
+# --- Переменные EFI (Доступ к nvram через /sys/firmware/efi/efivars) ---
+CONFIG_EFIVAR_FS=y
+
+#
+#  Mali-610G
+#
+CONFIG_FIRMWARE_IN_KERNEL=y
+CONFIG_EXTRA_FIRMWARE="mali/valhall/mali_csffw.bin"
+CONFIG_EXTRA_FIRMWARE_DIR="/lib/firmware"
+CONFIG_CMA_SIZE_MBYTES=1024
+
+#
+#  Wi-Fi — встроить rtl8822ce
+#
+CONFIG_RTW88=y
+CONFIG_RTW88_CORE=y
+CONFIG_RTW88_PCI=y
+CONFIG_RTW88_8822CE=y
+
+# PHY — встроить
+CONFIG_PHY_ROCKCHIP_INNO_USB2=y
+CONFIG_PHY_ROCKCHIP_NANENG_COMBO_PHY=y
+CONFIG_PHY_ROCKCHIP_EMMC=y
+CONFIG_PHY_ROCKCHIP_SAMSUNG_DCPHY=y
+CONFIG_PHY_ROCKCHIP_SNPS_PCIE3=y
+CONFIG_PHY_ROCKCHIP_PCIE=y
+
+
