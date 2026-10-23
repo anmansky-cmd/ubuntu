@@ -16,7 +16,7 @@ debootstrap flex libssl-dev bc rsync kmod cpio xz-utils fakeroot parted \
 udev dosfstools uuid-runtime git-lfs device-tree-compiler python3 \
 python-is-python3 fdisk bc debhelper python3-pyelftools python3-setuptools \
 python3-pkg-resources swig libfdt-dev libpython3-dev gawk \
-git ncurses-dev libelf-dev libgnutls28-dev libdw-dev wget kmod
+git ncurses-dev libelf-dev libgnutls28-dev libdw-dev wget kmod crossbuild-essential-arm64 dwarves 
 
 START_DIR=$(pwd)
 linux_dir=$1
@@ -34,7 +34,7 @@ cd "$linux_dir"
 BASE_DIR=$(pwd)
 
 # Клонируем ядро сразу в папку 'source' внутри виртуального диска
-git clone --depth 1 https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git -b linux-7.2.y source
+git clone --depth 1 https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git -b linux-7.3 source
 
 # Скачивание патчей медиа-декодера rkvdec
 mkdir patches && cd patches
