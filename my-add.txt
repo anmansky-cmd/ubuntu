@@ -2709,3 +2709,60 @@ CONFIG_QCOM_TZMEM_MODE_SHMBRIDGE=y
 CONFIG_QCOM_QSEECOM=n
 CONFIG_QCOM_QSEECOM_UEFISECAPP=y
 # end of
+
+# -------------------------------------------------------------
+#  Мультимедиа (Media)（Video4Linux / RGA / VDEC）
+# -------------------------------------------------------------
+# Включение аппаратного декодирования для использования в настольных системах
+CONFIG_MEDIA_SUPPORT=m
+CONFIG_MEDIA_PLATFORM_SUPPORT=y
+CONFIG_MEDIA_PLATFORM_DRIVERS=y
+CONFIG_V4L_MEM2MEM_DRIVERS=y
+CONFIG_VIDEO_DEV=m
+CONFIG_VIDEOBUF2_DMA_SG=m
+CONFIG_VIDEO_ROCKCHIP_RGA=m
+CONFIG_VIDEO_ROCKCHIP_VDEC=m
+
+CONFIG_DRM_ACCEL=y
+CONFIG_DRM_ACCEL_ROCKET=m
+
+ -------------------------------------------------------------
+# Chromium Дополнения для аппаратного декодирования
+# -------------------------------------------------------------
+CONFIG_VIDEO_ROCKCHIP_VDEC=m    # Существующий параметр: декодер VPU (H.264/H.265/VP9)
+CONFIG_ROCKCHIP_IOMMU=y         # Требуется для доступа VPU к памяти через DMA
+CONFIG_UDMABUF=y                # Требуется для совместного использования буферов (между GPU и VPU)
+CONFIG_DMABUF_HEAPS=y           # Аналогично предыдущему пункту
+CONFIG_DMABUF_HEAPS_SYSTEM=y    # Аналогично предыдущему пункту
+CONFIG_DMABUF_HEAPS_CMA=y       # Аналогично предыдущему пункту
+CONFIG_DMA_SHARED_BUFFER=y      # Базовый компонент для вышеуказанных параметров
+CONFIG_MEDIA_CONTROLLER=y       # V4L2
+CONFIG_VIDEO_V4L2_SUBDEV_API=y  # V4L2
+CONFIG_VSI_IOMMU=y              # Для декодирования AV01 в разрешении 4K
+
+########
+## Для загрузочных систем Arch Linux ARM / MiniMyth2 (поддерживаются cgroups и systemd)
+#####
+CONFIG_DEVTMPFS=y
+CONFIG_DEVTMPFS_MOUNT=y
+CONFIG_FHANDLE=y
+CONFIG_CGROUPS=y
+CONFIG_CGROUP_FREEZER=y
+CONFIG_CGROUP_PIDS=y
+CONFIG_CGROUP_DEVICE=y
+CONFIG_CPUSETS=y
+CONFIG_PROC_PID_CPUSET=y
+CONFIG_CGROUP_CPUACCT=y
+CONFIG_PAGE_COUNTER=y
+CONFIG_MEMCG=y
+CONFIG_CGROUP_SCHED=y
+CONFIG_FAIR_GROUP_SCHED=y
+CONFIG_CFS_BANDWIDTH=y
+CONFIG_BLK_CGROUP=y
+CONFIG_NAMESPACES=y
+CONFIG_UTS_NS=y
+CONFIG_IPC_NS=y
+CONFIG_USER_NS=y
+CONFIG_PID_NS=y
+CONFIG_NET_NS=y
+CONFIG_SYSFS_DEPRECATED=n
