@@ -26,8 +26,8 @@ rootfs:
 
 customization:
   extra-packages:
-    - name: "u-boot-tools"
-    - name: "u-boot-menu"
+   # - name: "u-boot-tools"
+   # - name: "u-boot-menu"
     - name: "ubuntu-desktop-minimal"
     - name: "linux-firmware"
     - name: "cloud-initramfs-growroot"
