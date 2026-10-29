@@ -38,6 +38,7 @@ git clone --depth 1 https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux
 
 # Скачивание патчей медиа-декодера rkvdec
 mkdir patches && cd patches
+wget https://raw.githubusercontent.com/anmansky-cmd/ubuntu/refs/heads/main/patches/gpu.patch
 wget https://raw.githubusercontent.com/rcawston/rockchip-rk3588-mainline-patches/refs/heads/main/0001-rockchip-rk3588-vepu580-encoder-support-v3.patch
 # 3559-media-rkvdec-fix-PM-runtime-teardown-ordering-in-remove.patch
 wget https://raw.githubusercontent.com/warpme/minimyth2/refs/heads/master/script/kernel/linux-7.3/files/3559-media-rkvdec-fix-PM-runtime-teardown-ordering-in-remove.patch
