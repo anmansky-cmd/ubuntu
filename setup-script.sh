@@ -20,13 +20,13 @@ if ! id -u ubuntu >/dev/null 2>&1; then
 fi
 
 # 5. Configure u-boot boot menu choices
-mkdir -p /usr/share/u-boot-menu/conf.d
-cat << 'EOF' > /usr/share/u-boot-menu/conf.d/ubuntu.conf
-U_BOOT_UPDATE="true"
-U_BOOT_PROMPT="1"
-U_BOOT_PARAMETERS="$(cat /etc/kernel/cmdline)"
-U_BOOT_TIMEOUT="20" 
-EOF
+#mkdir -p /usr/share/u-boot-menu/conf.d
+#cat << 'EOF' > /usr/share/u-boot-menu/conf.d/ubuntu.conf
+#U_BOOT_UPDATE="true"
+#U_BOOT_PROMPT="1"
+#U_BOOT_PARAMETERS="$(cat /etc/kernel/cmdline)"
+#U_BOOT_TIMEOUT="20" 
+#EOF
 
 # 6. Reset Machine IDs to force recalculation on first boot
 rm -f /var/lib/dbus/machine-id
@@ -42,8 +42,8 @@ fi
 cd / && rm -rf kernel
 
 # 8. Purge conflicting utilities and packages that block custom u-boot
-apt-get -y purge cloud-init flash-kernel fwupd ufw grub-efi-arm64 || true
-apt-get -y autoremove
-apt-get clean
+#apt-get -y purge cloud-init flash-kernel fwupd ufw grub-efi-arm64 || true
+#apt-get -y autoremove
+#apt-get clean
 
 sync
