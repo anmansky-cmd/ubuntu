@@ -3,24 +3,24 @@ name: ubuntu-rootfs
 display-name: Ubuntu rootfs ARM64
 revision: 2
 architecture: arm64
-series: stonking # РЕКОМЕНДАЦИЯ: Если 'resolute' еще не полностью доступен на ://ubuntu.com, используйте 'noble' (24.04)
+series: stonking
 class: preinstalled
 
 rootfs:
   archive: ubuntu
   sources-list-deb822: true
-  components:
-    - main
-    - restricted
-    - universe
-    - multiverse
-  mirror: "http://ports.ubuntu.com/ubuntu-ports/"
+  # Изменено на строчную запись для более надежного парсинга компонентами ubuntu-image
+  components: [main, restricted, universe, multiverse]
+  mirror: "http://ubuntu.com"
   pocket: updates
+  # Добавляем принудительное включение кармана безопасности, где часто лежат обновления provision-пакетов
+  pockets:
+    - updates
+    - security
   seed:
     urls:
-       - "https://git.launchpad.net/~ubuntu-core-dev/ubuntu-seeds/+git/"
-       #      - "https://git.launchpad.net/~ubuntu-core-dev/ubuntu-seeds/+git/ubuntu.resolute"
-    branch: stonking # Должно соответствовать выбранной серии (noble или resolute)
+       - "https://launchpad.net"
+    branch: stonking
     names:
       - minimal
 
@@ -36,7 +36,6 @@ customization:
     - name: "apparmor"
     - name: "apparmor-utils"
     - name: "apparmor-profiles"
-    # Заменено на актуальный метапакет тем для GNOME
     - name: "yaru-theme-gnome"
     - name: "ubuntu-desktop-provision"
   extra-snaps:
@@ -44,7 +43,6 @@ customization:
     - name: core26
     - name: mesa-2604
 
-# ИСПРАВЛЕНИЕ: Вместо сломанного пустого блока 'img:' указываем вывод в формате tar-архива rootfs
 artifacts:
   tar:
     architecture: arm64
