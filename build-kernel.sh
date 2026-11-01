@@ -53,7 +53,6 @@ cp patches/02_misc/*.patch ../
 # Выходим обратно и удаляем временный репозиторий
 cd .. && rm -rf temp_repo
 
-wget https://github.com/anmansky-cmd/linux-rockchip/tree/main/patches/02_misc/*.patch
 wget https://raw.githubusercontent.com/rcawston/rockchip-rk3588-mainline-patches/refs/heads/main/0001-rockchip-rk3588-vepu580-encoder-support-v3.patch
 # 3559-media-rkvdec-fix-PM-runtime-teardown-ordering-in-remove.patch
 wget https://raw.githubusercontent.com/warpme/minimyth2/refs/heads/master/script/kernel/linux-7.3/files/3559-media-rkvdec-fix-PM-runtime-teardown-ordering-in-remove.patch
