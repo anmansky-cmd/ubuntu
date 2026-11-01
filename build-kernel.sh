@@ -38,7 +38,9 @@ git clone --depth 1 https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux
 
 # Скачивание патчей медиа-декодера rkvdec
 mkdir patches && cd patches
-wget https://raw.githubusercontent.com/anmansky-cmd/ubuntu/refs/heads/main/patches/gpu.patch
+#wget https://raw.githubusercontent.com/anmansky-cmd/ubuntu/refs/heads/main/patches/gpu.patch
+wget https://github.com/anmansky-cmd/linux-rockchip/tree/main/patches/01_collabora/*.patch
+wget https://github.com/anmansky-cmd/linux-rockchip/tree/main/patches/02_misc/*.patch
 wget https://raw.githubusercontent.com/rcawston/rockchip-rk3588-mainline-patches/refs/heads/main/0001-rockchip-rk3588-vepu580-encoder-support-v3.patch
 # 3559-media-rkvdec-fix-PM-runtime-teardown-ordering-in-remove.patch
 wget https://raw.githubusercontent.com/warpme/minimyth2/refs/heads/master/script/kernel/linux-7.3/files/3559-media-rkvdec-fix-PM-runtime-teardown-ordering-in-remove.patch
@@ -58,7 +60,7 @@ wget https://raw.githubusercontent.com/warpme/minimyth2/refs/heads/master/script
 ## wget -O nanopc-t6-sdmmc-regulator.patch \
 #  "https://lore.kernel.org/r/20240102024054.1030313-1-inindev@gmail.com/raw"
 # Скачивание патчей медиа-декодера rkvdec
-mkdir patches && cd patches
+#mkdir patches && cd patches
 # ... ваши существующие wget ...
 
 # ДОБАВИТЬ: патч отключения HDMI RX (создаём прямо здесь, в patches/)
