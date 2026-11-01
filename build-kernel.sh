@@ -76,18 +76,18 @@ wget https://raw.githubusercontent.com/warpme/minimyth2/refs/heads/master/script
 # ... ваши существующие wget ...
 
 # ДОБАВИТЬ: патч отключения HDMI RX (создаём прямо здесь, в patches/)
-cat > nanopc-t6-disable-hdmirx.patch << 'PATCH_EOF'
---- a/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dts
-+++ b/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dts
-@@ -1,3 +1,13 @@
-+&hdmi_receiver {
-+	status = "disabled";
-+};
-+
-+&hdmi_receiver_cma {
-+	status = "disabled";
-+};
-+
+#cat > nanopc-t6-disable-hdmirx.patch << 'PATCH_EOF'
+#--- a/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dts
+#+++ b/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dts
+#@@ -1,3 +1,13 @@
+#+&hdmi_receiver {
+#+	status = "disabled";
+#+};
+#+
+#+&hdmi_receiver_cma {
+#+	status = "disabled";
+#+};
+#+
 diff --git a/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dts b/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dts
 index e69de29..a1b2c3d 100644
 --- a/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dts
