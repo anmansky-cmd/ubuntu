@@ -75,48 +75,6 @@ wget https://raw.githubusercontent.com/warpme/minimyth2/refs/heads/master/script
 #mkdir patches && cd patches
 # ... ваши существующие wget ...
 
-# ДОБАВИТЬ: патч отключения HDMI RX (создаём прямо здесь, в patches/)
-#cat > nanopc-t6-disable-hdmirx.patch << 'PATCH_EOF'
-#--- a/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dts
-#+++ b/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dts
-#@@ -1,3 +1,13 @@
-#+&hdmi_receiver {
-#+	status = "disabled";
-#+};
-#+
-#+&hdmi_receiver_cma {
-#+	status = "disabled";
-#+};
-#+
-diff --git a/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dts b/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dts
-index e69de29..a1b2c3d 100644
---- a/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dts
-+++ b/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dts
-@@ -0,0 +1,5 @@
-+
-+&gpu {
-+	sram-supply = <&vdd_gpu_mem_s0>;
-+};
-diff --git a/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dtsi b/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dtsi
-index e69de29..b2c3d4e 100644
---- a/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dtsi
-+++ b/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dtsi
-@@ -1,3 +1,13 @@
-+
-+&gpu {
-+	mali-supply = <&vdd_gpu_s0>;
-+	sram-supply = <&vdd_gpu_mem_s0>;
-+	status = "okay";
-+};
-+
-+&pd_gpu {
-+	domain-supply = <&vdd_gpu_s0>;
-+};
- /dts-v1/;
- #include "rk3588.dtsi"
- #include "rk3588-nanopc-t6.dtsi"
-PATCH_EOF
-
 cd "$BASE_DIR/source"
 
 # Применение патчей
