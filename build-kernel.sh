@@ -39,7 +39,20 @@ git clone --depth 1 https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux
 # Скачивание патчей медиа-декодера rkvdec
 mkdir patches && cd patches
 #wget https://raw.githubusercontent.com/anmansky-cmd/ubuntu/refs/heads/main/patches/gpu.patch
-wget https://github.com/anmansky-cmd/linux-rockchip/tree/main/patches/01_collabora/*.patch
+# Инициализируем «умное» клонирование только структуры репозитория
+git clone --depth 1 --filter=blob:none --sparse https://github.com/anmansky-cmd/linux-rockchip.git temp_repo
+cd temp_repo
+
+# Выкачиваем файлы только из нужных папок с патчами
+git sparse-checkout set patches/01_collabora patches/02_misc
+
+# Копируем их наружу в вашу общую папку patches
+cp patches/01_collabora/*.patch ../
+cp patches/02_misc/*.patch ../
+
+# Выходим обратно и удаляем временный репозиторий
+cd .. && rm -rf temp_repo
+
 wget https://github.com/anmansky-cmd/linux-rockchip/tree/main/patches/02_misc/*.patch
 wget https://raw.githubusercontent.com/rcawston/rockchip-rk3588-mainline-patches/refs/heads/main/0001-rockchip-rk3588-vepu580-encoder-support-v3.patch
 # 3559-media-rkvdec-fix-PM-runtime-teardown-ordering-in-remove.patch
