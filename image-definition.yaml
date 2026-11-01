@@ -37,8 +37,8 @@ customization:
     - name: "apparmor-utils"
     - name: "apparmor-profiles"
     # Заменено на актуальный метапакет тем для GNOME
-     - name: "yaru-theme-gnome"
-     - name: "ubuntu-desktop-provision"
+    - name: "yaru-theme-gnome"
+    - name: "ubuntu-desktop-provision"
   extra-snaps:
     - name: snapd
     - name: core26
