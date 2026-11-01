@@ -14,7 +14,7 @@ if [ $mem_size -gt 15 ]; then
 fi
 
 snap install --classic ubuntu-image
-ubuntu-image --debug --workdir build classic image-definition.yaml
+ubuntu-image --debug --workdir build classic --mirror "http://ubuntu.com" image-definition.yaml
 
 rm -rf build/root
 
