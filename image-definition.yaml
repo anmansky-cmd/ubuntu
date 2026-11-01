@@ -12,6 +12,8 @@ rootfs:
   # Изменено на строчную запись для более надежного парсинга компонентами ubuntu-image
   components: [main, restricted, universe, multiverse]
   mirror: "http://ubuntu.com"
+  # Явное указание зеркала для стадии germinate
+  germinate-mirror: "http://ubuntu.com"
   pocket: updates
   # Добавляем принудительное включение кармана безопасности, где часто лежат обновления provision-пакетов
   pockets:
