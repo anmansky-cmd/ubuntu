@@ -26,8 +26,6 @@ rootfs:
 
 customization:
   extra-packages:
-   # - name: "u-boot-tools"
-   # - name: "u-boot-menu"
     - name: "ubuntu-desktop-minimal"
     - name: "linux-firmware"
     - name: "cloud-initramfs-growroot"
@@ -38,18 +36,13 @@ customization:
     - name: "apparmor"
     - name: "apparmor-utils"
     - name: "apparmor-profiles"
-    # OEM-установщики (oem-config, ubiquity) отключены, так как образ создается как preinstalled (сразу готовый к работе)
-    - name: "oem-config-gtk"
-    - name: "ubiquity-frontend-gtk"
-    - name: "yaru-theme-unity"
-    - name: "aptdaemon"
-    - name: "oem-config"
-    - name: "oem-config-debconf"
-    - name: "ubiquity-slideshow-ubuntu"
+    # Заменено на актуальный метапакет тем для GNOME
+     - name: "yaru-theme-gnome"
+     - name: "ubuntu-desktop-provision"
   extra-snaps:
     - name: snapd
-    - name: core24
-    - name: mesa-2404
+    - name: core26
+    - name: mesa-2604
 
 # ИСПРАВЛЕНИЕ: Вместо сломанного пустого блока 'img:' указываем вывод в формате tar-архива rootfs
 artifacts:
