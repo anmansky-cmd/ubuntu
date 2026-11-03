@@ -102,23 +102,21 @@ EOF
 # ШАГ 5: Chroot для установки GRUB EFI
 # ============================================================
 mountpoint="${mount_point}/writable"
+
+# Автоматически определяем точные имена файлов установленного ядра 7.3
+vmlinuz_file=$(basename "$(ls "$mountpoint"/boot/vmlinuz-7.3.* 2>/dev/null | head -n 1)" 2>/dev/null || echo "")
+initrd_file=$(basename "$(ls "$mountpoint"/boot/initrd.img-7.3.* 2>/dev/null | head -n 1)" 2>/dev/null || echo "")
+
+if [ -z "$vmlinuz_file" ] || [ -z "$initrd_file" ]; then
+    echo "КРИТИЧЕСКАЯ ОШИБКА: Ядро или initramfs версии 7.3 не найдены в /boot распакованной rootfs!"
+    exit 1
+fi
+
 mount dev-live -t devtmpfs "$mountpoint/dev"
 mount devpts-live -t devpts -o nodev,nosuid "$mountpoint/dev/pts"
 mount proc-live -t proc "$mountpoint/proc"
 mount sysfs-live -t sysfs "$mountpoint/sys"
 mount securityfs -t securityfs "$mountpoint/sys/kernel/security"
-
-# --- ИСПРАВЛЕНИЕ МОЕЙ ОШИБКИ: Гарантируем создание папки etc ---
-mkdir -p "$mountpoint/etc"
-
-# --- ИСПРАВЛЕНИЕ ДЛЯ GITHUB ACTIONS: Настройка DNS внутри chroot ---
-# Создаем бэкап оригинального resolv.conf (если он был в корневом архиве)
-if [ -f "$mountpoint/etc/resolv.conf" ]; then
-    cp "$mountpoint/etc/resolv.conf" "$mountpoint/etc/resolv.conf.bak"
-fi
-# Записываем рабочий DNS, так как хостовый заглушка-резолвер 127.0.0.53 не работает в chroot
-echo "nameserver 8.8.8.8" > "$mountpoint/etc/resolv.conf"
-# ------------------------------------------------------------------
 
 # Копируем qemu для chroot на ARM64 (если хост не ARM64)
 if [ ! -f "$mountpoint/usr/bin/qemu-aarch64-static" ] && [ -f /usr/bin/qemu-aarch64-static ]; then
@@ -134,11 +132,19 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get install -y --no-install-recommends grub-efi-arm64 grub-efi-arm64-bin efibootmgr
 
-# Устанавливаем GRUB на ESP (removable — без NVRAM записей)
+# Устанавливаем GRUB на ESP (removable — без NVRAM записей, EDK2 UEFI подхватит его сам)
 grub-install --target=arm64-efi --efi-directory=/boot/efi --bootloader-id=ubuntu --removable --no-nvram
+CHROOT_SCRIPT
 
-# Генерируем grub.cfg
-cat > /boot/grub/grub.cfg << 'GRUB_CFG'
+chmod +x "$mountpoint/tmp/install-grub.sh"
+chroot "$mountpoint" /tmp/install-grub.sh
+rm -f "$mountpoint/tmp/install-grub.sh"
+
+# Генерируем структуру grub.cfg НАПРЯМУЮ из сессии хоста (сразу с готовыми переменными)
+# Мы создаем её и в корне EFI-раздела, и в папочке EFI/BOOT, и в системе
+generate_grub_cfg() {
+    local target_file="$1"
+    cat > "${target_file}" << EOF
 set default="0"
 set timeout="3"
 
@@ -146,40 +152,32 @@ menuentry "Ubuntu 26.10 LTS (Linux 7.3 Mainline patched)" {
     insmod gzio
     insmod part_gpt
     insmod ext2
-    search --no-floppy --fs-uuid --set=root ROOT_UUID_PLACEHOLDER
-    linux /boot/vmlinuz-7.3.0-rockchip-dirty root=UUID=ROOT_UUID_PLACEHOLDER rw console=ttyS2,1500000n8
-    initrd /boot/initrd.img-7.3.0-rockchip-dirty
+    search --no-floppy --fs-uuid --set=root ${root_uuid}
+    linux /boot/${vmlinuz_file} root=UUID=${root_uuid} rw rootwait console=ttyS2,1500000n8 console=tty1
+    initrd /boot/${initrd_file}
 }
 
 menuentry "Ubuntu 26.10 LTS (rescue mode)" {
     insmod gzio
     insmod part_gpt
     insmod ext2
-    search --no-floppy --fs-uuid --set=root ROOT_UUID_PLACEHOLDER
-    linux /boot/vmlinuz-7.3.0-rockchip-dirty root=UUID=ROOT_UUID_PLACEHOLDER rw single
-    initrd /boot/initrd.img-7.3.0-rockchip-dirty
+    search --no-floppy --fs-uuid --set=root ${root_uuid}
+    linux /boot/${vmlinuz_file} root=UUID=${root_uuid} rw rootwait single
+    initrd /boot/${initrd_file}
 }
-GRUB_CFG
+EOF
+}
 
-# Подставляем реальный UUID корня
-sed -i "s/ROOT_UUID_PLACEHOLDER/${ROOT_UUID}/g" /boot/grub/grub.cfg
+# Записываем конфигурацию во все места, где её могут искать съемный GRUB и EDK2
+mkdir -p "$mountpoint/boot/grub"
+mkdir -p "$mountpoint/boot/efi/EFI/BOOT"
 
-echo "=== GRUB установлен ==="
-ls -la /boot/efi/EFI/BOOT/
-CHROOT_SCRIPT
+generate_grub_cfg "$mountpoint/boot/grub/grub.cfg"
+generate_grub_cfg "$mountpoint/boot/efi/grub.cfg"
+generate_grub_cfg "$mountpoint/boot/efi/EFI/BOOT/grub.cfg"
 
-chmod +x "$mountpoint/tmp/install-grub.sh"
-chroot "$mountpoint" /tmp/install-grub.sh
-rm -f "$mountpoint/tmp/install-grub.sh"
-
-# --- ИСПРАВЛЕНИЕ ДЛЯ GITHUB ACTIONS: Восстановление DNS ---
-if [ -f "$mountpoint/etc/resolv.conf.bak" ]; then
-    mv "$mountpoint/etc/resolv.conf.bak" "$mountpoint/etc/resolv.conf"
-else
-    rm -f "$mountpoint/etc/resolv.conf"
-fi
-
-sync --file-system && sync
+echo "=== GRUB успешно настроен под EDK2 UEFI ==="
+ls -la "$mountpoint/boot/efi/EFI/BOOT/"
 
 # ============================================================
 # ШАГ 6: Финальная очистка
