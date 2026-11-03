@@ -108,6 +108,9 @@ mount proc-live -t proc "$mountpoint/proc"
 mount sysfs-live -t sysfs "$mountpoint/sys"
 mount securityfs -t securityfs "$mountpoint/sys/kernel/security"
 
+# --- ИСПРАВЛЕНИЕ МОЕЙ ОШИБКИ: Гарантируем создание папки etc ---
+mkdir -p "$mountpoint/etc"
+
 # --- ИСПРАВЛЕНИЕ ДЛЯ GITHUB ACTIONS: Настройка DNS внутри chroot ---
 # Создаем бэкап оригинального resolv.conf (если он был в корневом архиве)
 if [ -f "$mountpoint/etc/resolv.conf" ]; then
