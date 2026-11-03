@@ -3,32 +3,31 @@ name: ubuntu-rootfs
 display-name: Ubuntu rootfs ARM64
 revision: 2
 architecture: arm64
-series: stonking
+series: stonking # РЕКОМЕНДАЦИЯ: Если 'resolute' еще не полностью доступен на ://ubuntu.com, используйте 'noble' (24.04)
 class: preinstalled
 
 rootfs:
   archive: ubuntu
   sources-list-deb822: true
-  # Изменено на строчную запись для более надежного парсинга компонентами ubuntu-image
-  components: [main, restricted, universe, multiverse]
-  mirror: "http://ubuntu.com"
-  default-mirror: "http://ubuntu.com"
-  # Явное указание зеркала для стадии germinate
-  germinate-mirror: "http://ubuntu.com"
+  components:
+    - main
+    - restricted
+    - universe
+    - multiverse
+  mirror: "http://ports.ubuntu.com/ubuntu-ports/"
   pocket: updates
-  # Добавляем принудительное включение кармана безопасности, где часто лежат обновления provision-пакетов
-  pockets:
-    - updates
-    - security
   seed:
     urls:
-       - "https://launchpad.net"
-    branch: stonking
+       - "https://git.launchpad.net/~ubuntu-core-dev/ubuntu-seeds/+git/"
+       #      - "https://git.launchpad.net/~ubuntu-core-dev/ubuntu-seeds/+git/ubuntu.resolute"
+    branch: stonking # Должно соответствовать выбранной серии (noble или resolute)
     names:
       - minimal
 
 customization:
   extra-packages:
+   # - name: "u-boot-tools"
+   # - name: "u-boot-menu"
     - name: "ubuntu-desktop-minimal"
     - name: "linux-firmware"
     - name: "cloud-initramfs-growroot"
@@ -39,13 +38,20 @@ customization:
     - name: "apparmor"
     - name: "apparmor-utils"
     - name: "apparmor-profiles"
-    - name: "yaru-theme-gnome"
-    - name: "ubuntu-desktop-provision"
+    # OEM-установщики (oem-config, ubiquity) отключены, так как образ создается как preinstalled (сразу готовый к работе)
+    - name: "oem-config-gtk"
+    - name: "ubiquity-frontend-gtk"
+    - name: "yaru-theme-unity"
+    - name: "aptdaemon"
+    - name: "oem-config"
+    - name: "oem-config-debconf"
+    - name: "ubiquity-slideshow-ubuntu"
   extra-snaps:
     - name: snapd
-    - name: core26
-    - name: mesa-2604
+    - name: core24
+    - name: mesa-2404
 
+# ИСПРАВЛЕНИЕ: Вместо сломанного пустого блока 'img:' указываем вывод в формате tar-архива rootfs
 artifacts:
   tar:
     architecture: arm64
