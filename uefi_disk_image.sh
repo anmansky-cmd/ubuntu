@@ -32,6 +32,7 @@ if [ ! -f ./rootfs ]; then exit 1; fi
 mkdir -p images
 now=$(date +%F)
 img="./images/Ubuntu-${kernel_version}-$2-$now.img"
+size="$(( $(wc -c < "${rootfs}" ) / 1024 / 1024 ))"
 # UEFI-образ требует минимум 8 ГБ (ESP + rootfs + запас)
 truncate -s "8192M" "${img}"
 
@@ -93,24 +94,14 @@ esp_uuid=$(blkid -s UUID -o value "${disk}${partition_char}1")
 
 cat > ${mount_point}/writable/etc/fstab << EOF
 # <file system>     <mount point>  <type>  <options>   <dump>  <fsck>
-UUID=${root_uuid} /              ext4    defaults,x-systemd.growfs    0       1
-UUID=${esp_uuid}  /boot/efi      vfat    defaults                     0       2
+UUID=${root_uuid,,} /              ext4    defaults,x-systemd.growfs    0       1
+UUID=${esp_uuid,,}  /boot/efi      vfat    defaults                     0       2
 EOF
 
 # ============================================================
 # ШАГ 5: Chroot для установки GRUB EFI
 # ============================================================
 mountpoint="${mount_point}/writable"
-
-# Автоматически определяем точные имена файлов установленного ядра 7.3
-vmlinuz_file=$(basename "$(ls "$mountpoint"/boot/vmlinuz-7.3.* 2>/dev/null | head -n 1)" 2>/dev/null || echo "")
-initrd_file=$(basename "$(ls "$mountpoint"/boot/initrd.img-7.3.* 2>/dev/null | head -n 1)" 2>/dev/null || echo "")
-
-if [ -z "$vmlinuz_file" ] || [ -z "$initrd_file" ]; then
-    echo "КРИТИЧЕСКАЯ ОШИБКА: Ядро или initramfs версии 7.3 не найдены в /boot распакованной rootfs!"
-    exit 1
-fi
-
 mount dev-live -t devtmpfs "$mountpoint/dev"
 mount devpts-live -t devpts -o nodev,nosuid "$mountpoint/dev/pts"
 mount proc-live -t proc "$mountpoint/proc"
@@ -131,19 +122,11 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get install -y --no-install-recommends grub-efi-arm64 grub-efi-arm64-bin efibootmgr
 
-# Устанавливаем GRUB на ESP (removable — без NVRAM записей, EDK2 UEFI подхватит его сам)
+# Устанавливаем GRUB на ESP (removable — без NVRAM записей)
 grub-install --target=arm64-efi --efi-directory=/boot/efi --bootloader-id=ubuntu --removable --no-nvram
-CHROOT_SCRIPT
 
-chmod +x "$mountpoint/tmp/install-grub.sh"
-chroot "$mountpoint" /tmp/install-grub.sh
-rm -f "$mountpoint/tmp/install-grub.sh"
-
-# Генерируем структуру grub.cfg НАПРЯМУЮ из сессии хоста (сразу с готовыми переменными)
-# Мы создаем её и в корне EFI-раздела, и в папочке EFI/BOOT, и в системе
-generate_grub_cfg() {
-    local target_file="$1"
-    cat > "${target_file}" << EOF
+# Генерируем grub.cfg
+cat > /boot/grub/grub.cfg << 'GRUB_CFG'
 set default="0"
 set timeout="3"
 
@@ -151,32 +134,33 @@ menuentry "Ubuntu 26.10 LTS (Linux 7.3 Mainline patched)" {
     insmod gzio
     insmod part_gpt
     insmod ext2
-    search --no-floppy --fs-uuid --set=root ${root_uuid}
-    linux /boot/${vmlinuz_file} root=UUID=${root_uuid} rw rootwait console=ttyS2,1500000n8 console=tty1
-    initrd /boot/${initrd_file}
+    search --no-floppy --fs-uuid --set=root ROOT_UUID_PLACEHOLDER
+    linux /boot/vmlinuz-7.3.0-rockchip-dirty root=UUID=ROOT_UUID_PLACEHOLDER rw console=ttyS2,1500000n8
+    initrd /boot/initrd.img-7.3.0-rockchip-dirty
 }
 
 menuentry "Ubuntu 26.10 LTS (rescue mode)" {
     insmod gzio
     insmod part_gpt
     insmod ext2
-    search --no-floppy --fs-uuid --set=root ${root_uuid}
-    linux /boot/${vmlinuz_file} root=UUID=${root_uuid} rw rootwait single
-    initrd /boot/${initrd_file}
+    search --no-floppy --fs-uuid --set=root ROOT_UUID_PLACEHOLDER
+    linux /boot/vmlinuz-7.3.0-rockchip-dirty root=UUID=ROOT_UUID_PLACEHOLDER rw single
+    initrd /boot/initrd.img-7.3.0-rockchip-dirty
 }
-EOF
-}
+GRUB_CFG
 
-# Записываем конфигурацию во все места, где её могут искать съемный GRUB и EDK2
-mkdir -p "$mountpoint/boot/grub"
-mkdir -p "$mountpoint/boot/efi/EFI/BOOT"
+# Подставляем реальный UUID корня
+sed -i "s/ROOT_UUID_PLACEHOLDER/${ROOT_UUID}/g" /boot/grub/grub.cfg
 
-generate_grub_cfg "$mountpoint/boot/grub/grub.cfg"
-generate_grub_cfg "$mountpoint/boot/efi/grub.cfg"
-generate_grub_cfg "$mountpoint/boot/efi/EFI/BOOT/grub.cfg"
+echo "=== GRUB установлен ==="
+ls -la /boot/efi/EFI/BOOT/
+CHROOT_SCRIPT
 
-echo "=== GRUB успешно настроен под EDK2 UEFI ==="
-ls -la "$mountpoint/boot/efi/EFI/BOOT/"
+chmod +x "$mountpoint/tmp/install-grub.sh"
+chroot "$mountpoint" /tmp/install-grub.sh
+rm -f "$mountpoint/tmp/install-grub.sh"
+
+sync --file-system && sync
 
 # ============================================================
 # ШАГ 6: Финальная очистка
