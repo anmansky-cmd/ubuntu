@@ -108,6 +108,15 @@ mount proc-live -t proc "$mountpoint/proc"
 mount sysfs-live -t sysfs "$mountpoint/sys"
 mount securityfs -t securityfs "$mountpoint/sys/kernel/security"
 
+# --- ИСПРАВЛЕНИЕ ДЛЯ GITHUB ACTIONS: Настройка DNS внутри chroot ---
+# Создаем бэкап оригинального resolv.conf (если он был в корневом архиве)
+if [ -f "$mountpoint/etc/resolv.conf" ]; then
+    cp "$mountpoint/etc/resolv.conf" "$mountpoint/etc/resolv.conf.bak"
+fi
+# Записываем рабочий DNS, так как хостовый заглушка-резолвер 127.0.0.53 не работает в chroot
+echo "nameserver 8.8.8.8" > "$mountpoint/etc/resolv.conf"
+# ------------------------------------------------------------------
+
 # Копируем qemu для chroot на ARM64 (если хост не ARM64)
 if [ ! -f "$mountpoint/usr/bin/qemu-aarch64-static" ] && [ -f /usr/bin/qemu-aarch64-static ]; then
     cp /usr/bin/qemu-aarch64-static "$mountpoint/usr/bin/"
@@ -159,6 +168,13 @@ CHROOT_SCRIPT
 chmod +x "$mountpoint/tmp/install-grub.sh"
 chroot "$mountpoint" /tmp/install-grub.sh
 rm -f "$mountpoint/tmp/install-grub.sh"
+
+# --- ИСПРАВЛЕНИЕ ДЛЯ GITHUB ACTIONS: Восстановление DNS ---
+if [ -f "$mountpoint/etc/resolv.conf.bak" ]; then
+    mv "$mountpoint/etc/resolv.conf.bak" "$mountpoint/etc/resolv.conf"
+else
+    rm -f "$mountpoint/etc/resolv.conf"
+fi
 
 sync --file-system && sync
 
