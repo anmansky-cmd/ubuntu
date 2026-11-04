@@ -123,6 +123,18 @@ if [ ! -f "$mountpoint/usr/bin/qemu-aarch64-static" ] && [ -f /usr/bin/qemu-aarc
     cp /usr/bin/qemu-aarch64-static "$mountpoint/usr/bin/"
 fi
 
+# ------------------------------------------------------------
+# ИСПРАВЛЕНИЕ: Копируем рабочий DNS с хоста внутрь chroot
+# без этого apt-get внутри chroot не сможет скачать пакеты
+# ------------------------------------------------------------
+echo "=== Настройка DNS для chroot ==="
+if [ -L /etc/resolv.conf ]; then
+    # Если на хосте systemd-resolved, копируем реальный файл
+    cp /run/systemd/resolve/stub-resolv.conf "$mountpoint/etc/resolv.conf" 2>/dev/null || cp -L /etc/resolv.conf "$mountpoint/etc/resolv.conf"
+else
+    cp /etc/resolv.conf "$mountpoint/etc/resolv.conf"
+fi
+
 # Устанавливаем GRUB EFI внутри chroot
 cat << 'CHROOT_SCRIPT' > "$mountpoint/tmp/install-grub.sh"
 #!/bin/bash
@@ -140,6 +152,10 @@ chmod +x "$mountpoint/tmp/install-grub.sh"
 chroot "$mountpoint" /tmp/install-grub.sh
 rm -f "$mountpoint/tmp/install-grub.sh"
 
+# Очищаем resolv.conf, чтобы не тащить настройки хоста в образ
+rm -f "$mountpoint/etc/resolv.conf"
+ln -sf /run/systemd/resolve/stub-resolv.conf "$mountpoint/etc/resolv.conf"
+
 # Генерируем структуру grub.cfg НАПРЯМУЮ из сессии хоста (сразу с готовыми переменными)
 # Мы создаем её и в корне EFI-раздела, и в папочке EFI/BOOT, и в системе
 generate_grub_cfg() {
@@ -155,6 +171,7 @@ menuentry "Ubuntu 26.10 LTS (Linux 7.3 Mainline patched)" {
     search --no-floppy --fs-uuid --set=root ${root_uuid}
     linux /boot/${vmlinuz_file} root=UUID=${root_uuid} rw rootwait console=ttyS2,1500000n8 console=tty1
     initrd /boot/${initrd_file}
+    devicetree /boot/rk3588-nanopc-t6.dtb
 }
 
 menuentry "Ubuntu 26.10 LTS (rescue mode)" {
@@ -164,6 +181,7 @@ menuentry "Ubuntu 26.10 LTS (rescue mode)" {
     search --no-floppy --fs-uuid --set=root ${root_uuid}
     linux /boot/${vmlinuz_file} root=UUID=${root_uuid} rw rootwait single
     initrd /boot/${initrd_file}
+    devicetree /boot/rk3588-nanopc-t6.dtb
 }
 EOF
 }
