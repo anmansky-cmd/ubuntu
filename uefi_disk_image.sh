@@ -128,13 +128,16 @@ fi
 # без этого apt-get внутри chroot не сможет скачать пакеты
 # ------------------------------------------------------------
 echo "=== Настройка DNS для chroot ==="
+# Удаляем старую ссылку (если она есть), чтобы cp не ругался
+rm -f "$mountpoint/etc/resolv.conf"
+
+# Копируем реальное содержимое (флаг -L разыменовывает ссылки)
 if [ -L /etc/resolv.conf ]; then
-    # Если на хосте systemd-resolved, копируем реальный файл
-    cp /run/systemd/resolve/stub-resolv.conf "$mountpoint/etc/resolv.conf" 2>/dev/null || cp -L /etc/resolv.conf "$mountpoint/etc/resolv.conf"
+    cp -L /etc/resolv.conf "$mountpoint/etc/resolv.conf" 2>/dev/null || \
+    cp /run/systemd/resolve/stub-resolv.conf "$mountpoint/etc/resolv.conf"
 else
     cp /etc/resolv.conf "$mountpoint/etc/resolv.conf"
 fi
-
 # Устанавливаем GRUB EFI внутри chroot
 cat << 'CHROOT_SCRIPT' > "$mountpoint/tmp/install-grub.sh"
 #!/bin/bash
