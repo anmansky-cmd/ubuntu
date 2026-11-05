@@ -13,7 +13,26 @@ if [ $mem_size -gt 15 ]; then
      mount -t tmpfs -o size=13G tmpfs build
 fi
 
-snap install --classic ubuntu-image
+# ============================================================
+# ИСПРАВЛЕНИЕ: Установка ubuntu-image с повторными попытками
+# Snap Store часто отваливается по таймауту на GitHub Actions
+# ============================================================
+for i in {1..5}; do
+    echo "Попытка установки ubuntu-image (попытка $i из 5)..."
+    if snap install --classic ubuntu-image; then
+        echo "Ubuntu-image успешно установлен."
+        break
+    fi
+    
+    if [ $i -eq 5 ]; then
+        echo "КРИТИЧЕСКАЯ ОШИБКА: Не удалось установить ubuntu-image после 5 попыток."
+        exit 1
+    fi
+    
+    echo "Сетевая ошибка при скачивании Snap. Ожидание 15 секунд перед следующей попыткой..."
+    sleep 15
+done
+
 ubuntu-image --debug --workdir build classic image-definition.yaml
 
 rm -rf build/root
@@ -51,7 +70,7 @@ setup_mountpoint build/chroot
 mkdir -p build/chroot/kernel
 cp *.deb build/chroot/kernel/
 
-# 2. ИСПРАВЛЕНИЕ: Копируем скрипт настроек ТОЛЬКО после того, как все точки монтирования активны
+# 2. Копируем скрипт настроек ТОЛЬКО после того, как все точки монтирования активны
 chmod +x setup-script.sh
 cp setup-script.sh build/chroot/
 
