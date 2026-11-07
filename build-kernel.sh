@@ -94,13 +94,13 @@ cd "$BASE_DIR/source"
 #done
 
 # Создаем файл настроек (Kconfig-фрагмент) для NanoPC-T6, RTL8822CE и зависимостей RTL8812AU
-#cat << 'EOF' > my-add.txt
+cat << 'EOF' > my-add.txt
 # --- ОПТИМИЗАЦИЯ И СЕТЬ ДЛЯ NANOPC-T6 ---
-#CONFIG_ARCH_ROCKCHIP=y
-#CONFIG_ROCKCHIP_PM_DOMAINS=y
-#CONFIG_REGULATOR_RK808=y
+CONFIG_ARCH_ROCKCHIP=y
+CONFIG_ROCKCHIP_PM_DOMAINS=y
+CONFIG_REGULATOR_RK808=y
 #CONFIG_R8169=m
-#CONFIG_REALTEK_PHY=m
+CONFIG_REALTEK_PHY=m
 
 # --- ПОДДЕРЖКА WI-FI И BLUETOOTH (RTL8822CE) ---
 #CONFIG_WIRELESS=y
@@ -120,7 +120,7 @@ cd "$BASE_DIR/source"
 # --- ДЛЯ ВНЕШНЕГО МОДУЛЯ RTL8812AU ---
 #CONFIG_USB_NET_DRIVERS=m
 #CONFIG_NET_UDP_TUNNEL=m
-#EOF
+EOF
 
 # Экспорт переменных кросс-компиляции
 export ARCH=arm64
