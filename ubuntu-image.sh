@@ -32,7 +32,24 @@ for i in {1..5}; do
     sleep 15
 done
 
-ubuntu-image --debug --workdir build classic image-definition.yaml
+#### ubuntu-image --debug --workdir build classic image-definition.yaml
+# Попытка сборки образа с ретраями (из-за нестабильности Snap Store)
+for attempt in {1..3}; do
+    echo "Попытка сборки образа (попытка $attempt из 3)..."
+    if ubuntu-image --debug --workdir build classic image-definition.yaml; then
+        echo "Сборка образа успешно завершена."
+        break
+    fi
+    
+    if [ $attempt -eq 3 ]; then
+        echo "КРИТИЧЕСКАЯ ОШИБКА: Не удалось собрать образ после 3 попыток."
+        exit 1
+    fi
+    
+    echo "Ошибка при сборке. Очистка build и ожидание 30 секунд..."
+    rm -rf build/chroot  # Очищаем частично собранный chroot, чтобы начать заново
+    sleep 30
+done
 
 rm -rf build/root
 
