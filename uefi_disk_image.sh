@@ -112,6 +112,31 @@ if [ -z "$vmlinuz_file" ] || [ -z "$initrd_file" ]; then
     exit 1
 fi
 
+# ============================================================
+# ИСПРАВЛЕНИЕ: Копируем DTB для NanoPC-T6 в /boot
+# ============================================================
+echo "=== Копирование DTB rk3588-nanopc-t6.dtb в /boot ==="
+# Ищем DTB в стандартных местах (если он был установлен пакетом linux-image)
+if [ -f "${mountpoint}/usr/lib/linux-image-${kernel_version}/rockchip/rk3588-nanopc-t6.dtb" ]; then
+    cp "${mountpoint}/usr/lib/linux-image-${kernel_version}/rockchip/rk3588-nanopc-t6.dtb" "${mountpoint}/boot/rk3588-nanopc-t6.dtb"
+    echo "DTB скопирован из /usr/lib/linux-image-${kernel_version}/"
+elif [ -f "${mountpoint}/boot/dtbs/${kernel_version}/rockchip/rk3588-nanopc-t6.dtb" ]; then
+    cp "${mountpoint}/boot/dtbs/${kernel_version}/rockchip/rk3588-nanopc-t6.dtb" "${mountpoint}/boot/rk3588-nanopc-t6.dtb"
+    echo "DTB скопирован из /boot/dtbs/"
+else
+    echo "ПРЕДУПРЕЖДЕНИЕ: DTB rk3588-nanopc-t6.dtb не найден в стандартных путях!"
+    echo "Поиск по файловой системе..."
+    find "${mountpoint}" -name "rk3588-nanopc-t6.dtb" -exec cp {} "${mountpoint}/boot/rk3588-nanopc-t6.dtb" \; 2>/dev/null || true
+fi
+
+# Проверяем, что DTB скопировался
+if [ -f "${mountpoint}/boot/rk3588-nanopc-t6.dtb" ]; then
+    echo "DTB успешно скопирован в /boot/rk3588-nanopc-t6.dtb"
+else
+    echo "КРИТИЧЕСКАЯ ОШИБКА: Не удалось найти и скопировать DTB!"
+    exit 1
+fi
+
 mount dev-live -t devtmpfs "$mountpoint/dev"
 mount devpts-live -t devpts -o nodev,nosuid "$mountpoint/dev/pts"
 mount proc-live -t proc "$mountpoint/proc"
