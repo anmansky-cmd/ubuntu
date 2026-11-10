@@ -15,7 +15,6 @@ fi
 
 # ============================================================
 # ИСПРАВЛЕНИЕ: Установка ubuntu-image с повторными попытками
-# Snap Store часто отваливается по таймауту на GitHub Actions
 # ============================================================
 for i in {1..5}; do
     echo "Попытка установки ubuntu-image (попытка $i из 5)..."
@@ -70,19 +69,35 @@ setup_mountpoint build/chroot
 mkdir -p build/chroot/kernel
 cp *.deb build/chroot/kernel/
 
-# 2. Копируем скрипт настроек ТОЛЬКО после того, как все точки монтирования активны
+# 2. ИСПРАВЛЕНИЕ: Копируем рабочий DNS перед chroot
+# Удаляем битую ссылку (если есть), чтобы cp не ругался
+rm -f build/chroot/etc/resolv.conf
+
+# Копируем реальное содержимое (флаг -L разыменовывает ссылки на хосте)
+if [ -L /etc/resolv.conf ]; then
+    cp -L /etc/resolv.conf build/chroot/etc/resolv.conf 2>/dev/null || \
+    cp /run/systemd/resolve/stub-resolv.conf build/chroot/etc/resolv.conf
+else
+    cp /etc/resolv.conf build/chroot/etc/resolv.conf
+fi
+
+# 3. Копируем скрипт настроек
 chmod +x setup-script.sh
 cp setup-script.sh build/chroot/
 
-# 3. Запуск скрипта установки пакетов ядра внутри изолированного окружения
-# 
-cp /etc/resolv.conf build/chroot/etc/resolv.conf
+# 4. Запуск скрипта установки пакетов ядра внутри изолированного окружения
 chroot build/chroot /setup-script.sh
 
-# 4. Корректный демонтаж и очистка
+# 5. Корректный демонтаж и очистка
 teardown_mountpoint build/chroot
 rm -f build/chroot/setup-script.sh
 rm -rf build/chroot/kernel
+
+# ============================================================
+# ИСПРАВЛЕНИЕ: Восстанавливаем стандартную ссылку для systemd-resolved
+# ============================================================
+rm -f build/chroot/etc/resolv.conf
+ln -sf /run/systemd/resolve/stub-resolv.conf build/chroot/etc/resolv.conf
 
 rootfs="./ubuntu.rootfs.tar"
 echo "rootfs=$rootfs" > rootfs
@@ -91,7 +106,7 @@ echo "rootfs=$rootfs" > rootfs
 if [ -d build/chroot/lib/modules ]; then
     kernel_version=$(ls -1 build/chroot/lib/modules | head -n 1)
 else
-    # Резервный вариант парсинга ванильного имени Image-7.2.X
+    # Резервный вариант парсинга ванильного имени Image-7.3.X
     kernel_version=$(ls -1 build/chroot/boot/Image-* 2>/dev/null | head -n 1 | sed 's#.*/Image-##')
 fi
 
