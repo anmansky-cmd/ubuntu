@@ -75,6 +75,8 @@ chmod +x setup-script.sh
 cp setup-script.sh build/chroot/
 
 # 3. Запуск скрипта установки пакетов ядра внутри изолированного окружения
+# 
+cp /etc/resolv.conf build/chroot/etc/resolv.conf
 chroot build/chroot /setup-script.sh
 
 # 4. Корректный демонтаж и очистка
